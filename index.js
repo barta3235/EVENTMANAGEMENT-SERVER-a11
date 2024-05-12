@@ -3,7 +3,7 @@ const cors= require('cors')
 require('dotenv').config()
 const port = process.env.PORT || 5000
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 //middleware
@@ -32,10 +32,18 @@ async function run() {
 
 
     const serviceCollection = client.db('EventA11M11').collection('serviceCollection');
+    const bookingCollection = client.db('EventA11M11').collection('bookingCollection');
     
     app.get('/services', async(req,res)=>{
         const result= await serviceCollection.find().toArray()
         res.send(result);
+    })
+
+    app.get('/services/:id',async(req,res)=>{
+        const id=req.params.id;
+        const filter={_id: new ObjectId(id)}
+        const result= await serviceCollection.findOne(filter)
+        res.send(result)
     })
 
 
@@ -43,6 +51,18 @@ async function run() {
         const service= req.body;
         const result = await serviceCollection.insertOne(service);
         res.send(result)
+    })
+
+
+    app.get('/bookedServices',async(req,res)=>{
+        const result= await bookingCollection.find().toArray()
+        res.send(result); 
+    })
+
+    app.post('/bookedServices',async(req,res)=>{
+        const booking= req.body;
+        const result= await bookingCollection.insertOne(booking);
+        res.send(result);
     })
 
 
