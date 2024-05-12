@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 
 //middleware
 app.use(cors({
-    origin: ['http://localhost:5173/']
+    origin: ['http://localhost:5173']
 }))
 app.use(express.json())
 
@@ -31,8 +31,19 @@ async function run() {
     await client.connect();
 
 
+    const serviceCollection = client.db('EventA11M11').collection('serviceCollection');
     
+    app.get('/services', async(req,res)=>{
+        const result= await serviceCollection.find().toArray()
+        res.send(result);
+    })
 
+
+    app.post('/services', async(req,res)=>{
+        const service= req.body;
+        const result = await serviceCollection.insertOne(service);
+        res.send(result)
+    })
 
 
 
