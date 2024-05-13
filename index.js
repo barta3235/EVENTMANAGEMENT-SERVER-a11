@@ -39,6 +39,7 @@ async function run() {
         res.send(result);
     })
 
+    //services filtered by id
     app.get('/services/:id',async(req,res)=>{
         const id=req.params.id;
         const filter={_id: new ObjectId(id)}
@@ -64,6 +65,23 @@ async function run() {
         const result= await bookingCollection.insertOne(booking);
         res.send(result);
     })
+
+    // services filtered by email
+    app.get('/allServices/:email',async(req,res)=>{
+        const email= req.params.email;
+        const query= {email:email};
+        const result =await serviceCollection.find(query).toArray();
+        res.send(result);
+    })
+
+    //delete service
+    app.delete('/services/:id',async(req,res)=>{
+        const id= req.params.id;
+        const filter= {_id: new ObjectId(id)}
+        const result= await serviceCollection.deleteOne(filter);
+        res.send(result)
+    })
+
 
 
 
