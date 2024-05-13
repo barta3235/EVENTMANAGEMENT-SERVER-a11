@@ -108,6 +108,13 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/bookedServices/:email', async(req,res)=>{
+              const email= req.params.email;
+              const filter= {useremail: email};
+              const result= await bookingCollection.find(filter).toArray()
+              res.send(result);
+        })
+
         app.post('/bookedServices', async (req, res) => {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
