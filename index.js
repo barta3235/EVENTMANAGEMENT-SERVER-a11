@@ -33,6 +33,9 @@ async function run() {
 
         const serviceCollection = client.db('EventA11M11').collection('serviceCollection');
         const bookingCollection = client.db('EventA11M11').collection('bookingCollection');
+        const messageCollection = client.db('EventA11M11').collection('messageCollection');
+
+
 
         app.get('/services', async (req, res) => {
             const result = await serviceCollection.find().toArray()
@@ -119,6 +122,20 @@ async function run() {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
+        })
+
+
+        //review or message section
+
+        app.get('/message',async(req,res)=>{
+            const result= await messageCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/message',async(req,res)=>{
+            const message= req.body;
+            const result= await messageCollection.insertOne(message);
+            res.send(result); 
         })
 
 
