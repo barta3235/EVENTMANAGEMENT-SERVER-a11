@@ -8,9 +8,17 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 //middleware
 app.use(cors({
-    origin: ['http://localhost:5173']
+    origin: '*',
 }))
 app.use(express.json())
+
+
+
+const cookieOption = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+}
 
 
 
@@ -28,7 +36,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
 
         const serviceCollection = client.db('EventA11M11').collection('serviceCollection');
@@ -53,6 +61,12 @@ async function run() {
 
         app.post('/services', async (req, res) => {
             const service = req.body;
+            const em = req.body.email;
+            console.log('x1', em)
+            console.log('x2', req?.user?.email);
+            if (req?.user.email !== em) {
+                return res.status(403).send({ message: 'Unauthorized access' })
+            }
             const result = await serviceCollection.insertOne(service);
             res.send(result)
         })
@@ -78,25 +92,24 @@ async function run() {
         app.put(`/updateService/:id`, async (req, res) => {
             const id = req.params.id;
             const updateInfo = req.body;
-
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
 
 
             const updatedData = {
                 $set: {
-                    servicearea : updateInfo.servicearea,
-                    servicename : updateInfo.servicename,
-                    imageservice : updateInfo.imageservice,
-                    description : updateInfo.description,
-                    name : updateInfo.name,
-                    email : updateInfo.email,
-                    userimage : updateInfo.userimage,
-                    price : updateInfo.price
+                    servicearea: updateInfo.servicearea,
+                    servicename: updateInfo.servicename,
+                    imageservice: updateInfo.imageservice,
+                    description: updateInfo.description,
+                    name: updateInfo.name,
+                    email: updateInfo.email,
+                    userimage: updateInfo.userimage,
+                    price: updateInfo.price
                 }
             }
 
-            const result= await serviceCollection.updateOne(filter,updatedData,options)
+            const result = await serviceCollection.updateOne(filter, updatedData, options)
             res.send(result)
         })
 
@@ -111,31 +124,32 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/bookedServices/:email', async(req,res)=>{
-              const email= req.params.email;
-              const filter= {useremail: email};
-              const result= await bookingCollection.find(filter).toArray()
-              res.send(result);
+        app.get('/bookedServices/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { useremail: email };
+            const result = await bookingCollection.find(filter).toArray()
+            res.send(result);
         })
 
         app.post('/bookedServices', async (req, res) => {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
+
         })
 
 
         //review or message section
 
-        app.get('/message',async(req,res)=>{
-            const result= await messageCollection.find().toArray();
+        app.get('/message', async (req, res) => {
+            const result = await messageCollection.find().toArray();
             res.send(result);
         })
 
-        app.post('/message',async(req,res)=>{
-            const message= req.body;
-            const result= await messageCollection.insertOne(message);
-            res.send(result); 
+        app.post('/message', async (req, res) => {
+            const message = req.body;
+            const result = await messageCollection.insertOne(message);
+            res.send(result);
         })
 
 
@@ -143,7 +157,7 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
