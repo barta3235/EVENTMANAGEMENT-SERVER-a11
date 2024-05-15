@@ -54,13 +54,23 @@ async function run() {
         app.get('/filteredServices', async (req, res) => {
             const size= parseInt(req.query.size);
             const page=parseInt(req.query.page)-1;
+            const filter= req.query.filter
             console.log(size,page)
-            const result = await serviceCollection.find().skip(size*page).limit(size).toArray()
+
+
+            let query={};
+
+            if(filter) query= {servicename: filter}
+
+            const result = await serviceCollection.find(query).skip(size*page).limit(size).toArray()
             res.send(result);
         })
 
         app.get('/services-count',async(req,res)=>{
-            const count=await serviceCollection.countDocuments();
+            const filter=req.query.filter;
+            let query={};
+            if(filter) query={servicename: filter}
+            const count=await serviceCollection.countDocuments(query);
             res.send({count})
         })
 
