@@ -4,6 +4,7 @@ require('dotenv').config()
 const port = process.env.PORT || 5000
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { parse } = require('dotenv')
 
 
 //middleware
@@ -50,6 +51,19 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/filteredServices', async (req, res) => {
+            const size= parseInt(req.query.size);
+            const page=parseInt(req.query.page)-1;
+            console.log(size,page)
+            const result = await serviceCollection.find().skip(size*page).limit(size).toArray()
+            res.send(result);
+        })
+
+        app.get('/services-count',async(req,res)=>{
+            const count=await serviceCollection.countDocuments();
+            res.send({count})
+        })
+
         //services filtered by id
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
@@ -61,12 +75,6 @@ async function run() {
 
         app.post('/services', async (req, res) => {
             const service = req.body;
-            const em = req.body.email;
-            console.log('x1', em)
-            console.log('x2', req?.user?.email);
-            if (req?.user.email !== em) {
-                return res.status(403).send({ message: 'Unauthorized access' })
-            }
             const result = await serviceCollection.insertOne(service);
             res.send(result)
         })
